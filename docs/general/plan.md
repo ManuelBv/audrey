@@ -25,7 +25,7 @@ The user pastes text or uploads a Document (TXT, MD, or PDF with a text layer: l
 
 ### Domains
 
-- A tree with multiple roots: Science (biology, physics, ...), Engineering (civil, military, ...), Medicine, Law, others. Contents of the initial tree are an open decision.
+- A tree with multiple roots: Science (biology, physics, ...), Engineering (civil, military, ...), Medicine, Law, others. Initial tree (a machine-readable file in the repo, changes approved by the owner via commit): Science (Biology, Physics, Chemistry, Astronomy, Earth science, Mathematics); Medicine (Clinical medicine, Public health, Pharmacology); Engineering (Civil, Military, Electrical, Mechanical, Software); Law (UK law; US law skipped for now); Finance and Business (Accounting and auditing, Corporate finance, Economics, Markets and investing, Taxation, Business operations and management); General (fallback). Domains with no seed Authorities stay selectable but show a low-coverage warning. When inference is unsure between sibling domains it picks their parent and the Review says so.
 - The Document-level Domain is the default; it can be overridden per chapter, section or Claim (a book may span several roots).
 - Declared Domain → `DECLARED`. "Don't know" → inferred from the text and the Review is marked `INFERRED`, showing top candidates, confidence, and the fixed warning that the Review may not apply to the original Domain. Low-confidence inference is shown, not silently resolved.
 - Domain controls word-sense disambiguation (e.g. "induce" in psychology vs "inductance" in electronics), Authority routing, priors and weights.
@@ -150,7 +150,7 @@ These terms appear verbatim in code, types and tests. No informal synonyms.
 
 ## Open decisions
 
-1. Initial contents of the domain tree.
+1. Seed Authorities for Finance and Business (candidates not yet researched).
 2. How Claims are extracted and what makes a Claim checkable (settled in the step 8 spec).
 3. Public review limits: words per excerpt, share of the Document, takedown terms, redaction and secrets-scanning tools (step 14 research).
 4. Email: sender domain setup and DNS verification with Resend; exact sending restrictions before the domain is verified.
