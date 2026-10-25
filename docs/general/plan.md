@@ -23,6 +23,12 @@ The user pastes text or uploads a Document (TXT, MD, or PDF with a text layer: l
 - Claim Types: empirical-descriptive; empirical-causal (graded by study design); legal (what the text says, in force, jurisdiction, date; own sub-score); non-scorable (opinion, prediction, definition: marked "not scorable", no number).
 - Roll-up from Claim to paragraph, section, page and Document is not a plain average; it accounts for how load-bearing each Claim is.
 
+### Claim extraction (decided 2026-10-25)
+
+- A Claim is checkable if an Authority in its Domain could in principle support or contradict it: empirical, legal (what a text says, whether it is in force) and quantitative statements. Opinions, predictions, definitions, questions and instructions are marked "not scorable" and get no number.
+- Pipeline (same shape as the open-source Loki tool): (1) split the Document into sentences deterministically, keeping exact character positions for Anchors; (2) the LLM, given the surrounding Chunk context, resolves pronouns, rewrites each sentence into standalone atomic Claims and labels each Claim Type and checkability; (3) Depth decides which Claims are checked: Quick = Claims the LLM ranks as central to their section, Standard = every checkable sentence, Deep = every atomic subsentence Claim plus roll-ups.
+- The checkable/not-scorable label is an LLM judgment; the user can see it and override it per Claim. Details are refined in the step 8 spec.
+
 ### Domains
 
 - A tree with multiple roots: Science (biology, physics, ...), Engineering (civil, military, ...), Medicine, Law, others. Initial tree (a machine-readable file in the repo, changes approved by the owner via commit): Science (Biology, Physics, Chemistry, Astronomy, Earth science, Mathematics); Medicine (Clinical medicine, Public health, Pharmacology); Engineering (Civil, Military, Electrical, Mechanical, Software); Law (UK law; US law skipped for now); Finance and Business (Accounting and auditing, Corporate finance, Economics, Markets and investing, Taxation, Business operations and management); General (fallback). Domains with no seed Authorities stay selectable but show a low-coverage warning. When inference is unsure between sibling domains it picks their parent and the Review says so.
@@ -151,9 +157,8 @@ These terms appear verbatim in code, types and tests. No informal synonyms.
 ## Open decisions
 
 1. Seed Authorities for Finance and Business (candidates not yet researched).
-2. How Claims are extracted and what makes a Claim checkable (settled in the step 8 spec).
-3. Public review limits: words per excerpt, share of the Document, takedown terms, redaction and secrets-scanning tools (step 14 research).
-4. Email: sender domain setup and DNS verification with Resend; exact sending restrictions before the domain is verified.
-5. Wolfram|Alpha: snapshot storage terms and key model (deferred).
-6. National Archives case-law licence application, before building that Authority.
-7. Unverified items to check in the scaffold step: R2 with boto3, PyMuPDF word boxes, Render prices and Docker settings, BM25 extension availability, the pgvector Docker image name, halfvec support.
+2. Public review limits: words per excerpt, share of the Document, takedown terms, redaction and secrets-scanning tools (step 14 research).
+3. Email: sender domain setup and DNS verification with Resend; exact sending restrictions before the domain is verified.
+4. Wolfram|Alpha: snapshot storage terms and key model (deferred).
+5. National Archives case-law licence application, before building that Authority.
+6. Unverified items to check in the scaffold step: R2 with boto3, PyMuPDF word boxes, Render prices and Docker settings, BM25 extension availability, the pgvector Docker image name, halfvec support.
