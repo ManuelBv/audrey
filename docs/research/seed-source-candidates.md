@@ -1,6 +1,6 @@
 # Seed Authority Candidates (researched 2026-10-25)
 
-Candidates for the Registry, for owner approval. Not yet entries.
+Candidates for the Registry. Approved by the owner on 2026-10-25 as the starter seed set; entries are created per Authority later, after verifying licence, API and URL. Gaps below still need follow-up searches.
 
 Tags: **[S]** supported by the web search done that day; **[K]** from general knowledge only, not verified. The search results were mostly library guides and course notes, not the sources' own sites, so licence, API and exact URL must be verified when an entry is created. Domains were chosen by Claude as a starter set, not specified by the owner.
 

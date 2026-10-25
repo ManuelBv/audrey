@@ -57,18 +57,17 @@ These terms appear verbatim in code, types and tests. No informal synonyms.
 ## Architecture decisions
 
 - Review screen shows the original file with highlights over Claim locations. Accepted formats v1: TXT, MD, PDFs with a text layer. Scanned PDFs are out of scope; the user is told clearly when a PDF has no text.
-- Anchors: TXT = character range; PDF = page plus word bounding boxes (pdf.js overlays); all with exact quote plus prefix and suffix (W3C text-quote selector idea) so Claims can be re-found if extraction shifts. MD is rendered with quote-anchored highlights and a raw-source toggle (default, unconfirmed). PyMuPDF word boxes are from prior knowledge, not yet checked.
+- Anchors: TXT = character range; PDF = page plus word bounding boxes (pdf.js overlays); all with exact quote plus prefix and suffix (W3C text-quote selector idea) so Claims can be re-found if extraction shifts. MD is rendered by default with quote-anchored highlights and a raw-source toggle (owner informed 2026-10-25, no objection). PyMuPDF word boxes are from prior knowledge, not yet checked.
 - Reviews are progressive: the Document opens immediately; Claims are highlighted and scored as the worker finishes, streamed via server-sent events. Review Job and per-Claim progress live in Postgres, so a closed tab does not stop the job; the page shows full progress on return; streams are resumable; failures keep partial results and are retryable. The worker uses the user's decrypted Credential at run time.
 - Depth is chosen before the run. Each Depth is a superset of the one below, so upgrading only processes new Claims.
 - Retrieval: Anthropic's Contextual Retrieval design (chunk context prepended before both embedding and BM25), hybrid retrieval. Embeddings are required. Sentence-level embeddings are acceptable at expected volume (~60 MB per book at sentence level, ~3–8 MB at chunk level; both estimates). Embedding cost is negligible (~$0.003 per 100,000-word book at $0.02 per million tokens).
 - Settings page: per user, choose chat Provider and model and embedding Provider and model, and enter a Credential for each. The same mechanism will hold other service keys later.
 - Registry governance: a file in the repo, one global list. Suggestions (origin `USER` via feedback form with a reason, or `AI_RESEARCHER`) are reviewed by the owner; approval is a git commit. Roles of an Authority: Evidence, Modifier (e.g. Retraction Watch), Navigation/tertiary (e.g. Wikipedia, followed to primary sources).
 - Wolfram|Alpha is deferred: development proceeds without it. Notes on its terms are in the spec.
-- File storage for original Documents is undecided: Postgres large objects, Render persistent disk, or S3-compatible storage; cost on Render not yet researched.
+- File storage for original Documents sits behind a storage interface so the backend can change. Options researched 2026-10-25: Postgres bytea (simple, files under ~10 MB fine), Postgres Large Objects, Cloudflare R2 (free tier 10 GB per third-party sources), Render persistent disk (price unverified). Choice pending the owner's expected PDF volume; leaning Postgres bytea for v1.
 
 ## Open decisions
 
 1. File storage option and cost.
 2. Wolfram|Alpha: snapshot storage terms and key model (deferred).
-3. Seed Authority lists per domain: candidates in `../research/seed-source-candidates.md`, owner approval pending; follow-up searches needed for the gaps noted there.
-4. Whether MD shows rendered or raw by default.
+3. (decided) MD shows rendered by default with a raw toggle; owner has not objected.
