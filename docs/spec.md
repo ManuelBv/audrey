@@ -6,7 +6,7 @@ Status: DRAFT for review. No code written yet. Everything here comes from the de
 
 Upload or paste a document (PDF, TXT; legal, scientific, books). Audrey extracts claims at subsentence, sentence, paragraph, section and page level and compares each against authoritative sources. Every claim receives a Bayesian Score (BS), never a true/false verdict.
 
-Naming note: "ontological" is used loosely (empirical, factual, real-world). Strictly, the fit is "empirical"/"epistemic". Name expansion is an open decision (see section 12).
+Naming note: "ontological" is used loosely (empirical, factual, real-world). Strictly, the fit is "empirical"/"epistemic". The name expansion "Ontological Document Review Engine" was kept by the owner on 2026-10-25.
 
 ## 2. Bayesian Score (BS)
 
@@ -80,55 +80,15 @@ Registry governance:
 
 Document logic and implications: e.g. "page 4 discusses covenants on your leasehold in England; here is what they mean and why they may matter to you". This approaches legal advice: flag and explain only, with a clear disclaimer. Built after claim verification.
 
-## 9. BYOK and security
-
-- User enters an LLM API key in the account area. It is stored encrypted in the backend (AES-256-GCM; encryption key outside the database, in a secrets manager or environment secret). Encrypted, not hashed, because the backend must send it to the provider.
-- Write-only in the UI: after saving, show only the last 4 characters. Never logged.
-- Passwords: argon2id (or bcrypt) with per-user salt.
-- Standards: OWASP Top 10, ASVS, and OWASP Top 10 for LLM Applications. Uploaded documents and fetched web pages are untrusted input (prompt injection); the AI can only produce proposals and never changes scores or the registry directly.
-- Uploads: type and size validation, malware scanning.
-- Cost: show an estimated token cost before large runs. Prompts and pipeline are provider-neutral.
-
-## 10. Scope: general from the start (decided 2026-10-25)
+## 9. Scope: general from the start (decided 2026-10-25)
 
 No domain-limited first slice. The user pastes text or uploads TXT/PDF, specifies the domain (or "don't know" → INFERRED), and the AI investigates according to that domain using the source registry. Medicine is the first test domain, not a scope limit. Test cases: vaccines and autism (expect a score near 1), the sun/earth reading split, and the "induce" domain disambiguation. Consequence: the registry needs seed entries for every domain Audrey is tested on.
 
-## 11. Comparable products (researched 2026-10-25, vendor claims unverified)
+## 10. Comparable products (researched 2026-10-25, vendor claims unverified)
 
 Originality.ai, Winston AI, Manus, Detecting-ai.com, GetSolved.ai, scite; open source Loki, ClaimCheck, Claim_Verification_Pipeline, SciFact-style repos, aiFactCheck. RootCause.ai (also listed as Perceptura) is enterprise causal AI over structured data, not document review; its ontology idea (entities, time, location) is relevant to claim resolution.
 
-## 12. Stack and hosting (proposed; researched 2026-10-25, third-party sources, prices unconfirmed)
 
-- Frontend: React, Vite, TanStack Router and TanStack Query as a client-side SPA (TanStack Start not needed: FastAPI is the server). Typed client generated from FastAPI's OpenAPI schema.
-- Backend: Python, FastAPI, plus a worker for ingest and review jobs (book-length reviews run for minutes).
-- Database: PostgreSQL with pgvector for vectors and relational data (users, reviews, immutable accepted claims, registry feedback). Hybrid retrieval: vector plus BM25; Postgres full-text search is not true BM25, so use a BM25 extension if the host supports it, otherwise compute BM25 in the Python service. Qdrant is a later swap if scale demands; benchmark on real data in the first slice.
-- Size estimate: ~100,000-word book ≈ 270 chunks ≈ 3–5 MB with index (estimate), far below pgvector's cited 1M–5M vector ceilings.
-- Hosting: single provider with static site, web service, worker and Postgres. Leading candidate Render (`render.yaml` blueprint, roughly $20–33 a month at smallest always-on tiers); alternative Railway (Hobby $5 a month plus usage). Owner accepts a paid plan to keep everything in one place. Unconfirmed: pgvector availability on either host's managed Postgres (fallback: Neon for the database).
-- Auth: handled in the app itself (no OAuth for now).
-- Repository: https://github.com/ManuelBv/audrey (public, open source).
+## 11. Architecture and decisions
 
-## 13. Architecture decisions so far (discussion log, 2026-10-25)
-
-- Review screen shows the **original file** (PDF, TXT, MD) with highlights over claim locations; not an extracted-text view.
-- Accepted file formats v1: TXT, MD, and PDFs **with a text layer**. Scanned/image PDFs are out of scope; the user is told clearly when a PDF has no text.
-- Claim anchors: TXT = character-offset range; PDF = page number plus word bounding boxes in PDF coordinates (rendered by pdf.js as overlays); every anchor also stores the exact quote plus a few words of prefix and suffix (W3C text-quote selector idea) so claims can be re-found if extraction shifts. MD is rendered with quote-anchored highlights, with a raw-source toggle (default, unconfirmed).
-- The original file is stored and its SHA-256 recorded on every review.
-- Review runs are **progressive**: the document opens immediately and claims are highlighted and scored as the worker finishes them, streamed via server-sent events. Job and per-claim progress live in Postgres, so a closed tab does not stop the job; on return the page shows full progress from the database. Streams must be resumable after reconnect. The worker needs the user's decrypted API key at run time; failures keep partial results and are retryable.
-- Review **depth is chosen before the run** (tiered, to control the user's cost): Quick = major claims per section; Standard = every checkable sentence; Deep = every checkable subsentence claim plus paragraph/section/page roll-ups. Each tier is a superset of the one below, so upgrading a finished review only processes the new claims. A cost estimate is shown before each run.
-- **Embeddings are required** (hybrid retrieval: embeddings plus BM25, per the Contextual Retrieval design). Sentence-level embeddings are acceptable: expected usage is one user with many PDFs but only 1–2 books (estimate ~60 MB per book at sentence level, ~3–8 MB at chunk level).
-- Initial user base is the owner only, but the app has full **registration and login**, plus an **admin panel where the admin approves new users**. Every table keeps a `user_id`. The code is AGPL and may be self-hosted by others.
-- **Provider abstraction:** chat/LLM and embeddings each sit behind an interface with one adapter per provider so new providers can be added later. v1 ships with Anthropic for chat. Anthropic has no embedding model (its docs recommend Voyage AI), so the embedding provider is a separate choice (pending). Embedding rows record model name and dimension, because the vector column size is fixed per model and a model change means re-embedding.
-- **Provider settings (per user):** a settings page lets each user choose a chat/LLM provider and model and an embedding provider and model, and enter an API key for each provider used. Keys are encrypted server-side, write-only (last 4 characters shown), validated with a test call on save, and can be replaced or deleted. A provider that serves both purposes (e.g. OpenAI) uses one key. The same credential mechanism will hold other service keys later (e.g. Wolfram). Embedding providers researched 2026-10-25: Voyage AI (proposed v1, has a law model), OpenAI text-embedding-3-small (second adapter), plus Cohere, Google, Mistral, Jina and self-hosted open models as later options; sources conflict on prices, so confirm on each pricing page. Embedding cost is negligible at expected volume (~$0.003 per 100,000-word book at $0.02 per million tokens).
-- Embeddings from different models are not comparable. Each document records the embedding model it was embedded with; changing the embedding provider or model requires re-embedding existing documents (a job with a cost shown beforehand). A small retrieval test set (claims with known correct passages) should be used to compare providers on real data.
-- **Stale or missing embeddings:** if a document's embeddings came from a model the user has since switched away from, chat and review are blocked with a clear prompt ("re-embed for about $X?") until the user confirms the re-embed. If the user has **no embedding provider key at all**, Audrey runs in a BM25-only fallback mode with a visible banner. Each review records its retrieval mode (HYBRID or BM25-ONLY) next to its DECLARED/INFERRED domain badge, so reduced retrieval quality is never silent. Adding a key later offers an upgrade; accepted reviews stay immutable.
-- Voyage AI notes (researched 2026-10-25, pricing conflicts between sources): official pricing page lists voyage-3.5 at $0.06 and voyage-3.5-lite at $0.02 per million tokens, with free allowances for some models; a MongoDB docs page disagrees on which models are free. Check the account before relying on it.
-- Unchecked: PyMuPDF word-box output (from prior knowledge), file storage option (Postgres large objects vs persistent disk vs S3-compatible object storage) and its cost on Render.
-
-## 14. Open decisions
-
-Decided 2026-10-25: ODRE name expansion stays ("Ontological Document Review Engine"); no limited first slice (section 10); licence AGPL-3.0 (see LICENSE).
-
-1. pgvector availability on the chosen host (section 12).
-2. Wolfram|Alpha: storage/display of result snapshots, and per-user App IDs vs one owner key (commercial terms may apply).
-3. Seed source lists per domain (registry content).
-4. Architecture plan and data model.
+Moved to [general/plan.md](general/plan.md).

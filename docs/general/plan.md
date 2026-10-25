@@ -1,0 +1,75 @@
+# Audrey — Plan
+
+Architecture decisions, stack and ubiquitous language. Written collaboratively in the first working session (2026-10-25). Revisit only when an architectural decision actually changes.
+
+Product behaviour (what Audrey does, BS scoring, source tiers, review screen) lives in [../spec.md](../spec.md). The live step tracker is [progress.md](progress.md). Candidate authoritative sources per domain: [../research/seed-source-candidates.md](../research/seed-source-candidates.md).
+
+ODRE = Ontological Document Review Engine. Repository: https://github.com/ManuelBv/audrey (public, AGPL-3.0).
+
+## Ubiquitous language
+
+These terms appear verbatim in code, types and tests. No informal synonyms.
+
+| Term | Meaning |
+|---|---|
+| Document | A file the user uploaded (TXT, MD, or PDF with a text layer). Never called "source". |
+| Authority | An entry in the Registry: an authoritative source such as PubMed or legislation.gov.uk. |
+| Evidence | An excerpt from an Authority bearing on a Claim, stored with its Snapshot. |
+| Snapshot | Excerpt, URL, retrieval date, content hash and Registry commit hash stored with Evidence. |
+| Registry | The global, owner-approved list of Authorities, a file in the repo. |
+| Registry Suggestion | A proposed Authority with origin `USER` or `AI_RESEARCHER`. Not used for scoring until the owner approves it by commit. |
+| Claim | An assertion found in a Document, at subsentence, sentence, paragraph, section or page level. |
+| Claim Type | empirical-descriptive, empirical-causal, legal, or non-scorable. |
+| Interpretation | One reading of an ambiguous Claim, scored separately. |
+| Anchor | Where a Claim sits in a Document: character range (TXT), or page plus word bounding boxes (PDF); always with exact quote, prefix and suffix. |
+| Review | One run of Audrey over a Document at a chosen Depth. A re-run is a new Review. |
+| Depth | Quick (major claims per section), Standard (every checkable sentence), Deep (every checkable subsentence claim plus roll-ups). |
+| Domain | A node in the domain tree. Provenance is `DECLARED` or `INFERRED`. |
+| Retrieval Mode | `HYBRID` (embeddings plus BM25) or `BM25_ONLY`. Stored on every Review. |
+| Bayesian Score (BS) | Integer 1–99, computed from a prior and Evidence likelihood ratios. Never 0 or 100. |
+| Evidence Coverage | How much Evidence supports a BS; shown next to the score. |
+| Independence Cluster | Group of Authorities sharing an underlying data origin; counted once when combining Evidence. |
+| Accept | The user commits a Claim and its Evidence; it becomes immutable. |
+| Chunk | A contextualized piece of a Document indexed for retrieval (BM25 and embedding). |
+| Review Job | The background work behind a Review, with persisted progress. |
+| Provider | An LLM or embedding vendor reached through an adapter. |
+| Credential | A user's encrypted API key for a Provider. |
+
+## Stack
+
+- Frontend: React, Vite, TanStack Router, TanStack Query; client-side SPA (TanStack Start not needed because FastAPI is the server). Typed client generated from FastAPI's OpenAPI schema. PDFs rendered with pdf.js.
+- Backend: Python, FastAPI, plus a worker process for ingest and Review Jobs.
+- Database: PostgreSQL with pgvector (supported on Render Postgres per its docs; enable with `CREATE EXTENSION vector;`). Relational data, vectors and job state in one database. BM25: Postgres full-text search is not true BM25, so use a BM25 extension if available on the host, otherwise compute BM25 in the Python service. Qdrant is a later swap only if measured need appears.
+- Hosting: Render (static site, web service, worker, managed Postgres) defined by `render.yaml` at the repo root, with `rootDir` and `buildFilter` per service; roughly $20–33 a month at smallest always-on tiers (third-party figures, unconfirmed). Alternative: Railway. Fallback database: Neon.
+- Auth: in-app registration and login, admin approval of new users, no OAuth for now.
+
+## Cross-cutting rules (apply to every feature)
+
+1. Every table carries `user_id`. The app starts with one user (the owner) but has full registration, login and an admin panel where the admin approves users. The code is AGPL and may be self-hosted by others.
+2. Accepted Claims and their Evidence are immutable. Reopening a Review reads from the database and makes no live AI call. A re-run creates a new Review.
+3. Each Review records: file SHA-256, Registry commit hash, Domain provenance (`DECLARED`/`INFERRED` plus candidates and confidence), Retrieval Mode, Depth, embedding model and chat model.
+4. Provider abstraction: chat and embeddings each sit behind an interface with one adapter per Provider. v1 chat Provider is Anthropic. Embedding Provider proposed: Voyage AI, with OpenAI text-embedding-3-small as the second adapter (not yet confirmed by the owner).
+5. Credentials: encrypted (AES-256-GCM) with the key held outside the database, never hashed because the backend must use them; write-only in the UI (last 4 characters shown); validated with a test call on save; never logged. Passwords: argon2id with per-user salt. Standards: OWASP Top 10, ASVS, OWASP Top 10 for LLM Applications.
+6. Uploaded Documents and fetched web content are untrusted input (prompt injection). The AI only produces proposals; it never changes scores or the Registry directly. Uploads: type and size validation, malware scanning.
+7. Embeddings record model name and dimension. Changing the embedding model means re-embedding, shown with a cost estimate and confirmed first. Stale embeddings block chat and Review until confirmed. With no embedding key, run `BM25_ONLY` with a visible banner.
+8. A cost estimate is shown before each Review run and before any re-embed.
+
+## Architecture decisions
+
+- Review screen shows the original file with highlights over Claim locations. Accepted formats v1: TXT, MD, PDFs with a text layer. Scanned PDFs are out of scope; the user is told clearly when a PDF has no text.
+- Anchors: TXT = character range; PDF = page plus word bounding boxes (pdf.js overlays); all with exact quote plus prefix and suffix (W3C text-quote selector idea) so Claims can be re-found if extraction shifts. MD is rendered with quote-anchored highlights and a raw-source toggle (default, unconfirmed). PyMuPDF word boxes are from prior knowledge, not yet checked.
+- Reviews are progressive: the Document opens immediately; Claims are highlighted and scored as the worker finishes, streamed via server-sent events. Review Job and per-Claim progress live in Postgres, so a closed tab does not stop the job; the page shows full progress on return; streams are resumable; failures keep partial results and are retryable. The worker uses the user's decrypted Credential at run time.
+- Depth is chosen before the run. Each Depth is a superset of the one below, so upgrading only processes new Claims.
+- Retrieval: Anthropic's Contextual Retrieval design (chunk context prepended before both embedding and BM25), hybrid retrieval. Embeddings are required. Sentence-level embeddings are acceptable at expected volume (~60 MB per book at sentence level, ~3–8 MB at chunk level; both estimates). Embedding cost is negligible (~$0.003 per 100,000-word book at $0.02 per million tokens).
+- Settings page: per user, choose chat Provider and model and embedding Provider and model, and enter a Credential for each. The same mechanism will hold other service keys later.
+- Registry governance: a file in the repo, one global list. Suggestions (origin `USER` via feedback form with a reason, or `AI_RESEARCHER`) are reviewed by the owner; approval is a git commit. Roles of an Authority: Evidence, Modifier (e.g. Retraction Watch), Navigation/tertiary (e.g. Wikipedia, followed to primary sources).
+- Wolfram|Alpha is deferred: development proceeds without it. Notes on its terms are in the spec.
+- File storage for original Documents is undecided: Postgres large objects, Render persistent disk, or S3-compatible storage; cost on Render not yet researched.
+
+## Open decisions
+
+1. Embedding Provider confirmation (Voyage AI proposed).
+2. File storage option and cost.
+3. Wolfram|Alpha: snapshot storage terms and key model (deferred).
+4. Seed Authority lists per domain: candidates in `../research/seed-source-candidates.md`, owner approval pending; follow-up searches needed for the gaps noted there.
+5. Whether MD shows rendered or raw by default.
