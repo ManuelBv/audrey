@@ -58,6 +58,7 @@ Registry governance:
 
 - Accepted Claims and their Evidence are immutable in the database, per user. Reopening a Review reads from the database; no live AI call. A re-run creates a new Review; old ones are preserved.
 - Each Snapshot stores: excerpt, URL, retrieval date, content hash, Registry commit hash, score inputs (priors, likelihood ratios, clusters). Excerpts and hashes only, not full text (copyright position unverified).
+- Each Claim records which model did the research: for every LLM step (Claim extraction, domain inference, Evidence assessment, explanation) the Provider, the exact model identifier as returned by the API, the prompt version and the sampling parameters (e.g. temperature); embeddings record their Provider, model and dimension. This is stored per step, not just per Review, because a user can change models between runs or mid-job. The private and public Review screens show the models used.
 
 ### Retrieval and chat
 
@@ -124,7 +125,7 @@ These terms appear verbatim in code, types and tests. No informal synonyms.
 
 1. Every table carries `user_id`. The app starts with one user (the owner) but has full registration, login and an admin panel where the admin approves users. The code is AGPL and may be self-hosted by others.
 2. Accepted Claims and their Evidence are immutable. Reopening a Review reads from the database and makes no live AI call. A re-run creates a new Review.
-3. Each Review records: file SHA-256, Registry commit hash, Domain provenance (`DECLARED`/`INFERRED` plus candidates and confidence), Retrieval Mode, Depth, embedding model and chat model.
+3. Each Review records: file SHA-256, Registry commit hash, Domain provenance (`DECLARED`/`INFERRED` plus candidates and confidence), Retrieval Mode, Depth, embedding model and chat model (per-step model details are recorded on each Claim, see Persistence and immutability).
 4. Provider abstraction: chat and embeddings each sit behind an interface with one adapter per Provider. v1 chat Provider is Anthropic. Embedding Provider v1: Voyage AI (confirmed by the owner 2026-10-25), with OpenAI text-embedding-3-small as the second adapter. Each user chooses providers and models on a settings page and enters a Credential for each.
 5. Credentials: encrypted (AES-256-GCM) with the key held outside the database, never hashed because the backend must use them; write-only in the UI (last 4 characters shown); validated with a test call on save; never logged. Passwords: argon2id with per-user salt. Standards: OWASP Top 10, ASVS, OWASP Top 10 for LLM Applications.
 6. Uploaded Documents and fetched web content are untrusted input (prompt injection). The AI only produces proposals; it never changes scores or the Registry directly. Uploads: type and size validation, malware scanning.
