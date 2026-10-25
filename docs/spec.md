@@ -33,11 +33,18 @@ Tiers:
 | Tier | Sources | Weight |
 |---|---|---|
 | 1 Authoritative | Peer-reviewed literature, systematic reviews, legislation and regulation, government statistics, standards, technical manuals | Highest |
-| 2 Computed knowledge | Wolfram\|Alpha (API terms and pricing unverified) | High for quantitative/physical facts |
+| 2 Computed knowledge | Wolfram\|Alpha (via its API; see Wolfram notes below) | High for quantitative/physical facts |
 | 3 Other web | Institutional pages, reference works, encyclopedias (Wikipedia = tertiary: follow citations to the primary source and score that) | Lower, capped |
 | 4 News | All outlets classed as opinion | Minimal; if a news item cites a primary document, trace and score the primary |
 
 Weights live in config so they can be tuned.
+
+Wolfram|Alpha notes (researched 2026-10-25 from products.wolframalpha.com; confirm against your API Plan Summary):
+- Public info: https://products.wolframalpha.com/api (APIs), /api/pricing, /api/termsofuse, /api/documentation (Full Results API).
+- Free access for non-commercial use, advertised as up to 2,000 calls a month. Full Results API is $50 per 1,000 queries with a minimum prepayment, attribution and a contract. LLM API price is not published (contact Wolfram).
+- Terms prohibit using the services to train or fine-tune AI models or to build training datasets from service data. Required disclaimer in our own terms: results are not a certified or definitive source of information (exact wording in the terms).
+- Wolfram's own citation guidance: cite "Wolfram Alpha LLC", the query and access date; most results are computed from multiple underlying sources, and the "Source information" button gives the background sources. Audrey should store the query, access date and underlying sources with each Wolfram evidence item.
+- Design implications: use the API, not scraping (scraping terms not checked). Wolfram evidence counts as computed knowledge, weighted below the underlying primary source when that is identifiable. Whether snapshots of results may be stored and displayed to other users is unchecked, so keep them minimal until confirmed. Consider per-user Wolfram App IDs (BYOK) so usage and licensing sit with the user.
 
 Source roles: **Evidence** (supports/refutes), **Modifier** (changes trust in another source, e.g. Retraction Watch), **Navigation/tertiary**.
 
@@ -82,9 +89,9 @@ Document logic and implications: e.g. "page 4 discusses covenants on your leaseh
 - Uploads: type and size validation, malware scanning.
 - Cost: show an estimated token cost before large runs. Prompts and pipeline are provider-neutral.
 
-## 10. First vertical slice (default, unconfirmed)
+## 10. Scope: general from the start (decided 2026-10-25)
 
-Medicine only: PDF upload, domain selection and inference, claim extraction, retrieval from PubMed and Cochrane, BS score, claim-by-claim report with accept flow and database persistence. Test cases: vaccines and autism (expect a score near 1), the sun/earth reading split, and the "induce" domain disambiguation.
+No domain-limited first slice. The user pastes text or uploads TXT/PDF, specifies the domain (or "don't know" → INFERRED), and the AI investigates according to that domain using the source registry. Medicine is the first test domain, not a scope limit. Test cases: vaccines and autism (expect a score near 1), the sun/earth reading split, and the "induce" domain disambiguation. Consequence: the registry needs seed entries for every domain Audrey is tested on.
 
 ## 11. Comparable products (researched 2026-10-25, vendor claims unverified)
 
@@ -102,8 +109,9 @@ Originality.ai, Winston AI, Manus, Detecting-ai.com, GetSolved.ai, scite; open s
 
 ## 13. Open decisions
 
-1. Expansion of ODRE / meaning of "ontological".
-2. Confirm the first slice (section 10).
-3. Wolfram\|Alpha API terms and cost.
-4. pgvector availability on the chosen host (section 12).
-5. Open-source licence for the repository.
+Decided 2026-10-25: ODRE name expansion stays ("Ontological Document Review Engine"); no limited first slice (section 10); licence AGPL-3.0 (see LICENSE).
+
+1. pgvector availability on the chosen host (section 12).
+2. Wolfram|Alpha: storage/display of result snapshots, and per-user App IDs vs one owner key (commercial terms may apply).
+3. Seed source lists per domain (registry content).
+4. Architecture plan and data model.
