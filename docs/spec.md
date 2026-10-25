@@ -92,3 +92,15 @@ Originality.ai, Winston AI, Manus, Detecting-ai.com, GetSolved.ai, scite; open s
 ## 11. Architecture and decisions
 
 Moved to [general/plan.md](general/plan.md).
+
+## 12. Public reviews (decided 2026-10-25; step 14)
+
+- A user can publish an accepted Review. The public page uses the same layout as the private screen but is read-only and never includes the original file: it shows short excerpts written `[...] several words [...]`, followed by the Evidence, scores and explanation. Excerpt length and total share of the Document are capped (numbers to be set in the step-14 spec; product rule, not a legal safe harbour); title, author and page of the Document are acknowledged.
+- **Friction:** publishing moves a Review from `private` to `scheduled` with a visible countdown (default 10 minutes, unconfirmed) and an Undo button, then to `public`. Public listing only shows reviews whose scheduled time has passed.
+- **Redaction:** at publish time, text that looks like personal data or secrets is redacted from the public copy (candidate tool: Microsoft Presidio, which gives no completeness guarantee and does not detect secrets; a separate secrets scanner is needed). The user sees a preview of the redactions and confirms. The interface states that detection can miss items.
+- The public copy is a separate stored snapshot, so unpublishing deletes it. Private data is untouched. The user can unpublish at any time; the public URL then stops working. Copies already saved by others or indexed by search engines cannot be recalled; public pages carry a no-index tag by default.
+- **Anonymity:** each user gets a random three-word pseudonym at registration (curated word list, generated independent of user id or email, unique-indexed). Only the pseudonym is shown publicly; the real name stays in the private profile.
+- **Moderation:** an admin can take down any public review with a reason and audit log entry; viewers get a report button; the terms need a takedown process.
+- Public pages carry the standing disclaimer that scores are AI-generated, evidence-weighted outputs and not a certified or definitive source.
+- Public endpoints are separate read-only endpoints returning only published fields (no user ids, chat, keys or unpublished claims).
+- Copyright (US fair use, UK fair dealing for criticism/review/quotation) and personal-data questions are summarised from web searches; get legal advice before a wider public launch.
