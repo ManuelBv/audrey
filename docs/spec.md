@@ -90,10 +90,20 @@ Medicine only: PDF upload, domain selection and inference, claim extraction, ret
 
 Originality.ai, Winston AI, Manus, Detecting-ai.com, GetSolved.ai, scite; open source Loki, ClaimCheck, Claim_Verification_Pipeline, SciFact-style repos, aiFactCheck. RootCause.ai (also listed as Perceptura) is enterprise causal AI over structured data, not document review; its ontology idea (entities, time, location) is relevant to claim resolution.
 
-## 12. Open decisions
+## 12. Stack and hosting (proposed; researched 2026-10-25, third-party sources, prices unconfirmed)
+
+- Frontend: React, Vite, TanStack Router and TanStack Query as a client-side SPA (TanStack Start not needed: FastAPI is the server). Typed client generated from FastAPI's OpenAPI schema.
+- Backend: Python, FastAPI, plus a worker for ingest and review jobs (book-length reviews run for minutes).
+- Database: PostgreSQL with pgvector for vectors and relational data (users, reviews, immutable accepted claims, registry feedback). Hybrid retrieval: vector plus BM25; Postgres full-text search is not true BM25, so use a BM25 extension if the host supports it, otherwise compute BM25 in the Python service. Qdrant is a later swap if scale demands; benchmark on real data in the first slice.
+- Size estimate: ~100,000-word book ≈ 270 chunks ≈ 3–5 MB with index (estimate), far below pgvector's cited 1M–5M vector ceilings.
+- Hosting: single provider with static site, web service, worker and Postgres. Leading candidate Render (`render.yaml` blueprint, roughly $20–33 a month at smallest always-on tiers); alternative Railway (Hobby $5 a month plus usage). Owner accepts a paid plan to keep everything in one place. Unconfirmed: pgvector availability on either host's managed Postgres (fallback: Neon for the database).
+- Auth: handled in the app itself (no OAuth for now).
+- Repository: https://github.com/ManuelBv/audrey (public, open source).
+
+## 13. Open decisions
 
 1. Expansion of ODRE / meaning of "ontological".
 2. Confirm the first slice (section 10).
-3. Tech stack (not yet discussed).
-4. Wolfram\|Alpha API terms and cost.
-5. Whether `apps/audrey` is its own git repo (it is currently empty and has no `.git`).
+3. Wolfram\|Alpha API terms and cost.
+4. pgvector availability on the chosen host (section 12).
+5. Open-source licence for the repository.
