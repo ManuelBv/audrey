@@ -17,3 +17,18 @@ Tags: **[S]** supported by the web search done that day; **[K]** from general kn
 - Searches returned nothing for WHO, CDC, NICE, FDA, EMA, IEEE, NIST, MIL-STD/ASSIST, UK Parliament APIs, HM Land Registry, Gene Ontology, KEGG, bioRxiv, arXiv or the IAU.
 - Sources disagree on whether BAILII records have moved to the National Archives site; check the live sites.
 - Most engineering standards are paywalled, so Audrey may be able to cite them but not read them.
+
+## Access findings for free-only checks (researched 2026-10-25)
+
+Owner rule: v1 uses only Authorities that can be queried free of charge. Third-party sources unless noted; confirm on each official page when creating the entry.
+
+| Authority | Free access finding |
+|---|---|
+| PubMed E-utilities | No key needed; 3 requests/second, 10 with a free NCBI key. A scraper vendor claims a 9,999-record cap per query (unverified). |
+| Crossref | Free API with rate limits advertised in response headers (`X-Rate-Limit-Limit`, `X-Rate-Limit-Interval`); source is an older ropensci page. |
+| Semantic Scholar | Most endpoints work unauthenticated with a shared rate limit; limits unclear and may change. |
+| Europe PMC, OpenAlex | Nothing usable found; check official docs. |
+| legislation.gov.uk | Content under Open Government Licence v3.0 (site's own pages); some material has other terms (EUR-Lex-derived, Westlaw-contributed). API long described as free to re-use; check the Developer section. |
+| National Archives Find Case Law | Judgments reusable under the Open Justice Licence, including commercially, but bulk programmatic searching ("computational analysis") needs a free licence application assessed by the National Archives. Whether per-claim lookups count is unclear; contact caselawlicence@nationalarchives.gov.uk. |
+| Congress.gov API (US Library of Congress) | Free API key from api.congress.gov/sign-up (via api.data.gov), passed as `api_key`; JSON must be requested explicitly (XML is default). Sources are third-party plus a 2022 LoC blog post. |
+| loc.gov general API | Terms not found. |
