@@ -53,7 +53,8 @@ These terms appear verbatim in code, types and tests. No informal synonyms.
 6. Uploaded Documents and fetched web content are untrusted input (prompt injection). The AI only produces proposals; it never changes scores or the Registry directly. Uploads: type and size validation, malware scanning.
 7. Embeddings record model name and dimension. Changing the embedding model means re-embedding, shown with a cost estimate and confirmed first. Stale embeddings block chat and Review until confirmed. With no embedding key, run `BM25_ONLY` with a visible banner.
 8. A cost estimate is shown before each Review run and before any re-embed.
-9. At registration each user receives a random three-word pseudonym (unique, independent of user id or email), used for all public attribution. Public reviews use a separate redacted snapshot (see spec section 12).
+9. Registration is approval-gated: a new user starts `pending` and cannot log in or use the app until an admin approves. The users table has `status` (pending, approved, rejected, suspended), `approved_by`, `approved_at` and a reason; every admin action (approve, reject, suspend, takedown) is written to an audit table (who, what, when, why). The first admin is created by a one-time bootstrap (setup command or environment variables, never stored in the repo) because nobody exists to approve it; the owner will also register a normal user account and approve it as admin. Registration is rate-limited.
+10. At registration each user receives a random three-word pseudonym (unique, independent of user id or email), used for all public attribution. Public reviews use a separate redacted snapshot (see spec section 12).
 
 ## Architecture decisions
 
