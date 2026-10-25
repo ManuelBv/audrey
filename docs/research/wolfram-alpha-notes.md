@@ -1,0 +1,7 @@
+# Wolfram|Alpha Notes (researched 2026-10-25; deferred, confirm against your API Plan Summary)
+
+- Public info: https://products.wolframalpha.com/api (APIs), /api/pricing, /api/termsofuse, /api/documentation (Full Results API).
+- Free access for non-commercial use, advertised as up to 2,000 calls a month. Full Results API is $50 per 1,000 queries with a minimum prepayment, attribution and a contract. LLM API price is not published (contact Wolfram). Whether an open-source app others can run counts as non-commercial is unsettled.
+- Terms prohibit using the services to train or fine-tune AI models or to build training datasets from service data. A disclaimer is required in our own terms: results are not a certified or definitive source of information (exact wording in the terms).
+- Wolfram's citation guidance: cite "Wolfram Alpha LLC", the query and access date. Most results are computed from multiple underlying sources, and the "Source information" button reveals them. Audrey should store the query, access date and underlying sources with each Wolfram Evidence item.
+- Design implications: use the API, not scraping (scraping terms not checked). Wolfram Evidence counts as computed knowledge, weighted below the underlying primary source when identifiable. Whether result snapshots may be stored and shown to other users is unchecked, so keep them minimal until confirmed. With a single owner, one owner-held App ID is likely enough.

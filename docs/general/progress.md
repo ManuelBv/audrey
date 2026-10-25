@@ -6,7 +6,7 @@ Each step becomes a folder `docs/features/YYYY-MM-DD-NNN-feature-name/` created 
 
 ## Status
 
-Planning complete for the project level (plan.md, spec.md). No code yet. No feature specced.
+Planning complete for the project level (plan.md). No code yet. No feature specced.
 
 ## Steps (scaffold first confirmed; remaining order open to discussion by number)
 
