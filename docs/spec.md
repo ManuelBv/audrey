@@ -107,7 +107,15 @@ Originality.ai, Winston AI, Manus, Detecting-ai.com, GetSolved.ai, scite; open s
 - Auth: handled in the app itself (no OAuth for now).
 - Repository: https://github.com/ManuelBv/audrey (public, open source).
 
-## 13. Open decisions
+## 13. Architecture decisions so far (discussion log, 2026-10-25)
+
+- Review screen shows the **original file** (PDF, TXT, MD) with highlights over claim locations; not an extracted-text view.
+- Accepted file formats v1: TXT, MD, and PDFs **with a text layer**. Scanned/image PDFs are out of scope; the user is told clearly when a PDF has no text.
+- Claim anchors: TXT = character-offset range; PDF = page number plus word bounding boxes in PDF coordinates (rendered by pdf.js as overlays); every anchor also stores the exact quote plus a few words of prefix and suffix (W3C text-quote selector idea) so claims can be re-found if extraction shifts. MD is rendered with quote-anchored highlights, with a raw-source toggle (default, unconfirmed).
+- The original file is stored and its SHA-256 recorded on every review.
+- Unchecked: PyMuPDF word-box output (from prior knowledge), file storage option (Postgres large objects vs persistent disk vs S3-compatible object storage) and its cost on Render.
+
+## 14. Open decisions
 
 Decided 2026-10-25: ODRE name expansion stays ("Ontological Document Review Engine"); no limited first slice (section 10); licence AGPL-3.0 (see LICENSE).
 
