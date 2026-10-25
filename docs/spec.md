@@ -1,0 +1,99 @@
+# Audrey — Ontological Document Review Engine (ODRE): Draft Spec
+
+Status: DRAFT for review. No code written yet. Everything here comes from the design conversation of 2026-10-25.
+
+## 1. Purpose
+
+Upload or paste a document (PDF, TXT; legal, scientific, books). Audrey extracts claims at subsentence, sentence, paragraph, section and page level and compares each against authoritative sources. Every claim receives a Bayesian Score (BS), never a true/false verdict.
+
+Naming note: "ontological" is used loosely (empirical, factual, real-world). Strictly, the fit is "empirical"/"epistemic". Name expansion is an open decision (see section 12).
+
+## 2. Bayesian Score (BS)
+
+- Integer 1–99. Never 0 or 100 (absolutist claims are not scientific). 1 ≈ almost certainly false, 99 ≈ almost certainly true.
+- Computed, not guessed by an LLM: prior (by domain and claim type) updated by per-evidence likelihood ratios, combined in log-odds, clamped to 1–99.
+- Evidence items are clustered by independence cluster before combining, so sources deriving from the same underlying data count once.
+- Each claim shows two numbers: the score, and evidence coverage / credible interval (a 50 from no evidence differs from a 50 from conflicting strong studies).
+- Until calibrated against labelled benchmarks (FEVER, SciFact or similar), the UI labels it an "evidence-weighted score", not a probability.
+- Ambiguous claims are split into interpretations, each scored separately (e.g. "the sun revolves around the earth": acceptable as a coordinate-frame description, false as a physical description).
+- Claim types: empirical-descriptive, empirical-causal (graded by study design), legal (what the text says, in force, jurisdiction, date; own sub-score), and non-scorable (opinion, prediction, definition).
+- Roll-up from claim to paragraph, section, page, document is not a plain average; it accounts for how load-bearing each claim is.
+
+## 3. Domains
+
+- Tree with multiple roots: Science (biology, physics, ...), Engineering (civil, military, ...), Medicine, Law, others.
+- Document-level domain by default; override per chapter, section or claim (a book may span several roots).
+- At upload the user is asked for the domain. "Don't know" → domain inferred from text and the review is marked **INFERRED**, with top candidates, confidence, and the fixed warning that the review may not apply to the original domain. Declared → **DECLARED**. Low-confidence inference is shown, not silently resolved.
+- Domain controls word-sense disambiguation (e.g. "induce" in psychology vs "inductance" in electronics), source routing, priors and source weights.
+
+## 4. Sources and the registry
+
+Tiers:
+
+| Tier | Sources | Weight |
+|---|---|---|
+| 1 Authoritative | Peer-reviewed literature, systematic reviews, legislation and regulation, government statistics, standards, technical manuals | Highest |
+| 2 Computed knowledge | Wolfram\|Alpha (API terms and pricing unverified) | High for quantitative/physical facts |
+| 3 Other web | Institutional pages, reference works, encyclopedias (Wikipedia = tertiary: follow citations to the primary source and score that) | Lower, capped |
+| 4 News | All outlets classed as opinion | Minimal; if a news item cites a primary document, trace and score the primary |
+
+Weights live in config so they can be tuned.
+
+Source roles: **Evidence** (supports/refutes), **Modifier** (changes trust in another source, e.g. Retraction Watch), **Navigation/tertiary**.
+
+Registry entry fields: name, URL, domains (many-to-many), source type (journal, legislation, statistics, standard, technical manual, ...), role, tier, access method (API / bulk / scrape / manual), licence and terms, version/revision (standards and manuals are valid per revision and date), independence cluster, independence flag (manufacturer manuals), provenance (added by, when, justification, origin tag), review date.
+
+Registry governance:
+- Stored as a file in the repo (YAML or JSON), loaded by the backend. One global list.
+- Changes enter via suggestions with an origin tag: **User** (feedback form with reason) or **AI researcher** (in-app researcher prompt).
+- Owner approves or rejects. Approval = a git commit adding the entry. Nothing affects scores before that.
+- Each review stores the registry commit hash.
+- Open issues: paywalled standards (ISO, IEEE), military manuals (public ones only), manufacturer bias. Licences not yet verified.
+
+## 5. Review screen
+
+- Left: document with highlighted claims.
+- Right: sources sidebar. Per source: name, a one-line statement of whether the claim is supported/contradicted or what the alternative claim is, and the source.
+- Lower right: chat panel for custom questions about the document (RAG, section 7).
+- Per claim, the user clicks **Accept** to commit the claim and its sources.
+
+## 6. Persistence and immutability
+
+- Accepted claims and their sources are immutable in the database, per user.
+- Reopening a past review reads from the database; no live AI call.
+- Store with each accepted source: excerpt, URL, retrieval date, content hash, registry commit hash, score inputs (priors, likelihood ratios, clusters). Excerpts and hashes only, not full text (copyright position unverified).
+- A re-run creates a new review version; old ones are preserved.
+
+## 7. RAG and chat
+
+- Anthropic's Contextual Retrieval design: at ingest, each chunk gets short document-specific context prepended before both embedding and BM25 indexing; retrieval combines both.
+- Per-document pre-work at ingest produces claim assertions plus the document's internal logic.
+
+## 8. Second analysis layer (phase 2)
+
+Document logic and implications: e.g. "page 4 discusses covenants on your leasehold in England; here is what they mean and why they may matter to you". This approaches legal advice: flag and explain only, with a clear disclaimer. Built after claim verification.
+
+## 9. BYOK and security
+
+- User enters an LLM API key in the account area. It is stored encrypted in the backend (AES-256-GCM; encryption key outside the database, in a secrets manager or environment secret). Encrypted, not hashed, because the backend must send it to the provider.
+- Write-only in the UI: after saving, show only the last 4 characters. Never logged.
+- Passwords: argon2id (or bcrypt) with per-user salt.
+- Standards: OWASP Top 10, ASVS, and OWASP Top 10 for LLM Applications. Uploaded documents and fetched web pages are untrusted input (prompt injection); the AI can only produce proposals and never changes scores or the registry directly.
+- Uploads: type and size validation, malware scanning.
+- Cost: show an estimated token cost before large runs. Prompts and pipeline are provider-neutral.
+
+## 10. First vertical slice (default, unconfirmed)
+
+Medicine only: PDF upload, domain selection and inference, claim extraction, retrieval from PubMed and Cochrane, BS score, claim-by-claim report with accept flow and database persistence. Test cases: vaccines and autism (expect a score near 1), the sun/earth reading split, and the "induce" domain disambiguation.
+
+## 11. Comparable products (researched 2026-10-25, vendor claims unverified)
+
+Originality.ai, Winston AI, Manus, Detecting-ai.com, GetSolved.ai, scite; open source Loki, ClaimCheck, Claim_Verification_Pipeline, SciFact-style repos, aiFactCheck. RootCause.ai (also listed as Perceptura) is enterprise causal AI over structured data, not document review; its ontology idea (entities, time, location) is relevant to claim resolution.
+
+## 12. Open decisions
+
+1. Expansion of ODRE / meaning of "ontological".
+2. Confirm the first slice (section 10).
+3. Tech stack (not yet discussed).
+4. Wolfram\|Alpha API terms and cost.
+5. Whether `apps/audrey` is its own git repo (it is currently empty and has no `.git`).
