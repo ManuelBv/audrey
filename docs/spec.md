@@ -113,6 +113,7 @@ Originality.ai, Winston AI, Manus, Detecting-ai.com, GetSolved.ai, scite; open s
 - Accepted file formats v1: TXT, MD, and PDFs **with a text layer**. Scanned/image PDFs are out of scope; the user is told clearly when a PDF has no text.
 - Claim anchors: TXT = character-offset range; PDF = page number plus word bounding boxes in PDF coordinates (rendered by pdf.js as overlays); every anchor also stores the exact quote plus a few words of prefix and suffix (W3C text-quote selector idea) so claims can be re-found if extraction shifts. MD is rendered with quote-anchored highlights, with a raw-source toggle (default, unconfirmed).
 - The original file is stored and its SHA-256 recorded on every review.
+- Review runs are **progressive**: the document opens immediately and claims are highlighted and scored as the worker finishes them, streamed via server-sent events. Job and per-claim progress live in Postgres, so a closed tab does not stop the job; on return the page shows full progress from the database. Streams must be resumable after reconnect. The worker needs the user's decrypted API key at run time; failures keep partial results and are retryable.
 - Unchecked: PyMuPDF word-box output (from prior knowledge), file storage option (Postgres large objects vs persistent disk vs S3-compatible object storage) and its cost on Render.
 
 ## 14. Open decisions
