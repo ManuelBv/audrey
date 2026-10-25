@@ -71,7 +71,7 @@ Document logic and implications, e.g. "page 4 discusses covenants on your leaseh
 ### Public reviews (step 14)
 
 - A user can publish an accepted Review. The public page uses the same layout as the private screen but is read-only and never includes the original file: it shows short excerpts written `[...] several words [...]`, followed by Evidence, scores and explanation. Excerpt length and total share of the Document are capped (numbers set in the step-14 spec; a product rule, not a legal safe harbour). The Document's title, author and page are acknowledged.
-- Friction: publishing moves a Review from `private` to `scheduled` with a visible countdown (default 10 minutes, unconfirmed) and an Undo button, then to `public`. The public listing only shows Reviews whose scheduled time has passed.
+- Friction: publishing moves a Review from `private` to `scheduled` with a visible countdown (10 minutes, confirmed by the owner 2026-10-25) and an Undo button, then to `public`. The public listing only shows Reviews whose scheduled time has passed.
 - Redaction: at publish time, text that looks like personal data or secrets is redacted from the public copy (candidate tool: Microsoft Presidio, which gives no completeness guarantee and does not detect secrets, so a separate secrets scanner is needed). The user sees a preview and confirms; the interface states that detection can miss items.
 - The public copy is a separate stored snapshot, so unpublishing deletes it. Private data is untouched. The user can unpublish at any time and the public URL then stops working. Copies others already saved or search engines indexed cannot be recalled; public pages carry a no-index tag by default.
 - Anonymity: only the user's three-word pseudonym is shown publicly; the real name stays in the private profile.
@@ -151,7 +151,7 @@ These terms appear verbatim in code, types and tests. No informal synonyms.
 
 1. Initial contents of the domain tree.
 2. How Claims are extracted and what makes a Claim checkable (settled in the step 8 spec).
-3. Public review limits: words per excerpt, share of the Document, publish delay (10 minutes proposed), takedown terms, redaction and secrets-scanning tools (step 14 research).
+3. Public review limits: words per excerpt, share of the Document, takedown terms, redaction and secrets-scanning tools (step 14 research).
 4. Email: sender domain and verification flow (deferred).
 5. Wolfram|Alpha: snapshot storage terms and key model (deferred).
 6. National Archives case-law licence application, before building that Authority.
