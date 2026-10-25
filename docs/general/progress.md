@@ -8,7 +8,7 @@ Each step becomes a folder `docs/features/YYYY-MM-DD-NNN-feature-name/` created 
 
 Planning complete for the project level (plan.md, spec.md). No code yet. No feature specced.
 
-## Steps (draft order — owner to reorder/approve)
+## Steps (scaffold first confirmed; remaining order open to discussion by number)
 
 | # | Step | Status |
 |---|---|---|
@@ -28,4 +28,4 @@ Planning complete for the project level (plan.md, spec.md). No code yet. No feat
 
 ## Next
 
-Owner to confirm or reorder the steps, then run the Speccer on the first step.
+Order confirmed by the owner on 2026-10-25: scaffold (step 1) first; later steps are discussed and referred to by number. US law domain skipped for now. Next: run the Speccer on step 1.
