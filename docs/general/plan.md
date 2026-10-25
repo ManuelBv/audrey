@@ -76,12 +76,12 @@ Document logic and implications, e.g. "page 4 discusses covenants on your leaseh
 
 ### Public reviews (step 14)
 
-- A user can publish an accepted Review. The public page uses the same layout as the private screen but is read-only and never includes the original file: it shows short excerpts written `[...] several words [...]`, followed by Evidence, scores and explanation. Excerpt length and total share of the Document are capped (numbers set in the step-14 spec; a product rule, not a legal safe harbour). The Document's title, author and page are acknowledged.
+- A user can publish an accepted Review. The public page uses the same layout as the private screen but is read-only and never includes the original file: it shows short excerpts written `[...] several words [...]`, followed by Evidence, scores and explanation. Excerpt caps (accepted by the owner 2026-10-25; a product rule, not a legal safe harbour): at most 25 words per excerpt, at most 5% of the Document's words in total and never more than 400 words in total, whichever limit is reached first. The Document's title, author and page are acknowledged.
 - Friction: publishing moves a Review from `private` to `scheduled` with a visible countdown (10 minutes, confirmed by the owner 2026-10-25) and an Undo button, then to `public`. The public listing only shows Reviews whose scheduled time has passed.
 - Redaction: at publish time, text that looks like personal data or secrets is redacted from the public copy (candidate tool: Microsoft Presidio, which gives no completeness guarantee and does not detect secrets, so a separate secrets scanner is needed). The user sees a preview and confirms; the interface states that detection can miss items.
 - The public copy is a separate stored snapshot, so unpublishing deletes it. Private data is untouched. The user can unpublish at any time and the public URL then stops working. Copies others already saved or search engines indexed cannot be recalled; public pages carry a no-index tag by default.
 - Anonymity: only the user's three-word pseudonym is shown publicly; the real name stays in the private profile.
-- Moderation: an admin can take down any public Review with a reason and an audit log entry; viewers get a report button; the terms need a takedown process.
+- Moderation: an admin can take down any public Review with a reason and an audit log entry; viewers get a report button. A terms page states that the admin may delete any public Review at their discretion, for any reason, without liability (owner's wording, 2026-10-25). Enforceability of that clause and any statutory notice-and-takedown duties are unverified; have a lawyer review the terms before a wider public launch.
 - Public pages carry the standing disclaimer that scores are AI-generated, evidence-weighted outputs and not a certified or definitive source.
 - Public endpoints are separate and read-only, returning only published fields (no user ids, chat, keys or unpublished Claims).
 - Copyright (US fair use, UK fair dealing for criticism/review/quotation) and personal-data points come from web searches, not legal advice; get legal advice before a wider public launch.
@@ -157,7 +157,7 @@ These terms appear verbatim in code, types and tests. No informal synonyms.
 ## Open decisions
 
 1. Seed Authorities for Finance and Business (candidates not yet researched).
-2. Public review limits: words per excerpt, share of the Document, takedown terms, redaction and secrets-scanning tools (step 14 research).
+2. Public reviews: redaction and secrets-scanning tools (step 14 research); lawyer review of the terms page before a wider public launch.
 3. Email: sender domain setup and DNS verification with Resend; exact sending restrictions before the domain is verified.
 4. Wolfram|Alpha: snapshot storage terms and key model (deferred).
 5. National Archives case-law licence application, before building that Authority.
