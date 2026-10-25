@@ -159,6 +159,7 @@ These terms appear verbatim in code, types and tests. No informal synonyms.
 1. Seed Authorities for Finance and Business (candidates not yet researched).
 2. Public reviews: redaction and secrets-scanning tools (step 14 research); lawyer review of the terms page before a wider public launch.
 3. Email: domain verification in Resend is postponed by the owner; revisit before letting anyone but the owner register.
-4. Wolfram|Alpha: snapshot storage terms and key model (deferred).
-5. National Archives case-law licence application, before building that Authority.
-6. Unverified items to check in the scaffold step: R2 with boto3, PyMuPDF word boxes, Render prices and Docker settings, BM25 extension availability, the pgvector Docker image name, halfvec support.
+4. Wolfram|Alpha: snapshot storage terms and key model (deferred by the owner).
+5. National Archives case-law licence application, before building that Authority (deferred by the owner).
+
+Items previously listed as "unverified" are assigned to the step whose Researcher must check them; see "Research owed by step" in [progress.md](progress.md).

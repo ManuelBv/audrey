@@ -30,3 +30,16 @@ Planning complete for the project level (plan.md). No code yet. No feature specc
 ## Next
 
 Order confirmed by the owner on 2026-10-25: scaffold (step 1) first; later steps are discussed and referred to by number. US law domain skipped for now. Next: run the Speccer on step 1.
+
+## Research owed by step
+
+Facts recorded in plan.md from memory or third-party sources that the named step's Researcher must verify against official documentation before relying on them.
+
+| Step | To verify |
+|---|---|
+| 1 | Render prices (web Starter, Postgres Basic-256mb, 5 GB storage) and Docker service settings in `render.yaml`; pgvector Docker image name and `CREATE EXTENSION vector` on Render; test and hook tooling (pytest, Vitest, Playwright, pre-commit, secret scanner); CI on GitHub Actions for a public repo |
+| 2 | Password hashing library settings (argon2id); session handling behind Render's proxy |
+| 4 | R2 with the Python S3 client (boto3), including presigned URLs; PyMuPDF word-level bounding boxes; malware scanning tool for uploads |
+| 6 | Registry and domain-tree file format |
+| 7 | BM25 extension availability on Render Postgres, otherwise a Python BM25 library; halfvec support; Voyage model names, dimensions and current prices |
+| 14 | Presidio accuracy on English legal text; a secrets scanner (detect-secrets or similar) |
