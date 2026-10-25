@@ -48,7 +48,7 @@ These terms appear verbatim in code, types and tests. No informal synonyms.
 1. Every table carries `user_id`. The app starts with one user (the owner) but has full registration, login and an admin panel where the admin approves users. The code is AGPL and may be self-hosted by others.
 2. Accepted Claims and their Evidence are immutable. Reopening a Review reads from the database and makes no live AI call. A re-run creates a new Review.
 3. Each Review records: file SHA-256, Registry commit hash, Domain provenance (`DECLARED`/`INFERRED` plus candidates and confidence), Retrieval Mode, Depth, embedding model and chat model.
-4. Provider abstraction: chat and embeddings each sit behind an interface with one adapter per Provider. v1 chat Provider is Anthropic. Embedding Provider proposed: Voyage AI, with OpenAI text-embedding-3-small as the second adapter (not yet confirmed by the owner).
+4. Provider abstraction: chat and embeddings each sit behind an interface with one adapter per Provider. v1 chat Provider is Anthropic. Embedding Provider v1: Voyage AI (confirmed by the owner 2026-10-25), with OpenAI text-embedding-3-small as the second adapter.
 5. Credentials: encrypted (AES-256-GCM) with the key held outside the database, never hashed because the backend must use them; write-only in the UI (last 4 characters shown); validated with a test call on save; never logged. Passwords: argon2id with per-user salt. Standards: OWASP Top 10, ASVS, OWASP Top 10 for LLM Applications.
 6. Uploaded Documents and fetched web content are untrusted input (prompt injection). The AI only produces proposals; it never changes scores or the Registry directly. Uploads: type and size validation, malware scanning.
 7. Embeddings record model name and dimension. Changing the embedding model means re-embedding, shown with a cost estimate and confirmed first. Stale embeddings block chat and Review until confirmed. With no embedding key, run `BM25_ONLY` with a visible banner.
@@ -68,8 +68,7 @@ These terms appear verbatim in code, types and tests. No informal synonyms.
 
 ## Open decisions
 
-1. Embedding Provider confirmation (Voyage AI proposed).
-2. File storage option and cost.
-3. Wolfram|Alpha: snapshot storage terms and key model (deferred).
-4. Seed Authority lists per domain: candidates in `../research/seed-source-candidates.md`, owner approval pending; follow-up searches needed for the gaps noted there.
-5. Whether MD shows rendered or raw by default.
+1. File storage option and cost.
+2. Wolfram|Alpha: snapshot storage terms and key model (deferred).
+3. Seed Authority lists per domain: candidates in `../research/seed-source-candidates.md`, owner approval pending; follow-up searches needed for the gaps noted there.
+4. Whether MD shows rendered or raw by default.
