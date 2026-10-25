@@ -25,6 +25,7 @@ Planning complete for the project level (plan.md, spec.md). No code yet. No feat
 | 11 | Accept flow and immutability | Not started |
 | 12 | Document chat | Not started |
 | 13 | Later: document logic and implications layer | Not started |
+| 14 | Public reviews: publish and unpublish an accepted Review, public listing, read-only view (depends on 4, 5, 11) | Not started |
 
 ## Next
 
