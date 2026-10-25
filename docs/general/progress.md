@@ -13,7 +13,7 @@ Planning complete for the project level (plan.md). No code yet. No feature specc
 | # | Step | Status |
 |---|---|---|
 | 1 | Scaffold: repo layout, frontend and backend skeletons, tests, CI, `render.yaml` | Not started |
-| 2 | Registration (incl. three-word pseudonym), login, admin approval panel | Not started |
+| 2 | Registration (incl. three-word pseudonym, email verification), login, password reset, admin approval panel and daily digest | Not started |
 | 3 | Provider settings and encrypted Credential store | Not started |
 | 4 | Document upload, storage, text extraction with Anchors | Not started |
 | 5 | Document viewer with Claim highlights (PDF, TXT, MD) | Not started |
